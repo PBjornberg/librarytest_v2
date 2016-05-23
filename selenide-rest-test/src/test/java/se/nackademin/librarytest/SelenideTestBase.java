@@ -5,7 +5,7 @@
  */
 package se.nackademin.librarytest;
 
-import static com.codeborne.selenide.Selenide.open;
+import com.codeborne.selenide.Configuration;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,6 +18,7 @@ public class SelenideTestBase {
     @Before
     public void setup() {
         open("http://localhost:8080/librarytest");
+        Configuration.timeout = 6000;
     }
 
     @After
