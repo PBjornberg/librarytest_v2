@@ -201,7 +201,8 @@ public class SelenideTest extends SelenideTestBase {
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToMyProfile();        
         MyProfilePage myProfilePage = page(MyProfilePage.class); 
-        myProfilePage.clickFirstResultTitle();   
+        myProfilePage.clickFirstResultTitle(); 
+        bookPage.waitForPageToLoad();
         assertEquals(bookTitle, bookPage.getTitle());
         
         // Return book

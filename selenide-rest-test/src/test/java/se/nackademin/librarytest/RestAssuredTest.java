@@ -444,7 +444,7 @@ public class RestAssuredTest {
         Response getResponse = ro.getAllLoans();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
         // Pick the last book in the list
-        Loans loans = getResponse.jsonPath().getObject("loans", Loans.class);
+        Loans loans = getResponse.jsonPath().prettyPeek().getObject("loans", Loans.class);
         return loans.getLoanList().get(loans.getLoanList().size()-1);
     }
 }

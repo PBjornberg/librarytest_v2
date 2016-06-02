@@ -6,7 +6,11 @@
 package se.nackademin.selenide.pages;
 
 import com.codeborne.selenide.SelenideElement;
+import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * @author testautomatisering
@@ -36,7 +40,7 @@ public class BookViewPage extends MenuPage {
     private SelenideElement confirmDialogOKButton;  
     
 
-    public String getTitle() {
+    public String getTitle() {       
         return titleField.getText();
     }
 
@@ -70,5 +74,9 @@ public class BookViewPage extends MenuPage {
     
     public void clickEditBookButton() {
         clickButton("edit book button", editBookButton);
-    }    
+    }
+
+    public void waitForPageToLoad() {
+        WebElement element = new WebDriverWait(getWebDriver(), 30).until(ExpectedConditions.elementToBeClickable(nbrOfCopiesAvailableField)); 
+    }
 }
