@@ -6,10 +6,10 @@
 package se.nackademin.selenide.helpers;
 
 
-import se.nackademin.gson.model.User;
-import se.nackademin.selenide.pages.AddOrEditUserPage;
+import se.nackademin.selenide.model.User;
+import se.nackademin.selenide.pages.UserFormPage;
 import se.nackademin.selenide.pages.MenuPage;
-import se.nackademin.selenide.pages.SignInPage;
+import se.nackademin.selenide.pages.UserSignInPage;
 import se.nackademin.selenide.pages.MyProfilePage;
 import static com.codeborne.selenide.Selenide.page;
 
@@ -17,23 +17,42 @@ import static com.codeborne.selenide.Selenide.page;
  * @author testautomatisering
  */
 public class UserHelper {
-    public static void createNewUser(String username, 
+    
+    /**
+     * Creates a new User
+     * 
+     * @param username
+     * @param password
+     * @param firstName
+     * @param lastName
+     * @param phoneNbr
+     * @param email
+     * @param librarianRole true = LIBRARIAN, otherwise LOANER
+     * @return UserFormPage
+     */
+    public static UserFormPage createNewUser(String username, 
             String password, 
             String firstName, 
             String lastName, 
             String phoneNbr, 
-            String email) {
+            String email,
+            boolean librarianRole) {
+        
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToAddUser();
 
-        AddOrEditUserPage addUserPage = page(AddOrEditUserPage.class);
-        addUserPage.setUsername(username);
-        addUserPage.setPassword(password);
-        addUserPage.setFirstName(firstName);
-        addUserPage.setLastName(lastName);
-        addUserPage.setPhoneNbr(phoneNbr);
-        addUserPage.setEmail(email);
-        addUserPage.clickAddUserButton();
+        UserFormPage userFormPage = page(UserFormPage.class);
+        userFormPage.setUsername(username);
+        userFormPage.setPassword(password);
+        userFormPage.setFirstName(firstName);
+        userFormPage.setLastName(lastName);
+        userFormPage.setPhoneNbr(phoneNbr);
+        userFormPage.setEmail(email);
+        if (librarianRole) {
+                userFormPage.clickLibrarianRadioButton();
+            }
+        userFormPage.clickAddUserButton();
+        return userFormPage;
     }
     
     /**
@@ -57,7 +76,7 @@ public class UserHelper {
         MyProfilePage myProfilePage = page(MyProfilePage.class);
         myProfilePage.clickEditUserButton();
         
-        AddOrEditUserPage editUserPage = page(AddOrEditUserPage.class);
+        UserFormPage editUserPage = page(UserFormPage.class);
 
         if (password!=null) { editUserPage.setPassword(password); }
         if (firstName!=null) { editUserPage.setFirstName(firstName); }        
@@ -70,7 +89,7 @@ public class UserHelper {
     public static void logInAsUser(String username, String password) {
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToSignIn();
-        SignInPage signInPage = page(SignInPage.class);
+        UserSignInPage signInPage = page(UserSignInPage.class);
         signInPage.setUsername(username);
         signInPage.setPassword(password);
         signInPage.clickLogIn();
@@ -91,5 +110,18 @@ public class UserHelper {
         user.setPhoneNbr(myProfilePage.getPhoneNbr());
         user.setEmail(myProfilePage.getEmail());
         return user;
-    }    
+    }
+    
+    /**
+     * Deletes the logged in user. 
+     * Logged in user must have role "LIBRARIAN", otherwise delete button will not be visible
+     * 
+     * @param username
+     * @param password 
+     */
+    public static void deleteUser(String username, String password){
+        logInAsUser(username, password);
+        MyProfilePage myProfilePage = page(MyProfilePage.class);
+        myProfilePage.clickDeleteUserButton();
+    }
 }

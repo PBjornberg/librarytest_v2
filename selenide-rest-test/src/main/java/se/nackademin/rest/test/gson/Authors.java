@@ -1,4 +1,4 @@
-package se.nackademin.rest.test.model;
+package se.nackademin.rest.test.gson;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class Authors {
     }
 
     /**
-     * @param book the author to set
+     * @param author the author to set
      */
     public void setAuthorList(List <Author> author) {
         this.author = author;

@@ -6,12 +6,17 @@
 package se.nackademin.selenide.pages;
 
 import com.codeborne.selenide.SelenideElement;
+import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * @author testautomatisering
  */
-public class AddOrEditUserPage extends MenuPage {
+public class UserFormPage extends MenuPage {
 
     @FindBy(css = "#gwt-uid-3")
     private SelenideElement userNameField;
@@ -24,13 +29,22 @@ public class AddOrEditUserPage extends MenuPage {
     @FindBy(css = "#gwt-uid-11")
     private SelenideElement phoneNbrField;
     @FindBy(css = "#gwt-uid-13")
-    private SelenideElement emailField;    
-    
+    private SelenideElement emailField; 
+    //@FindBy(css = "#gwt-uid-16")
+    @FindBy(id = "gwt-uid-16")  
+    private SelenideElement librarianRadioButton;    
+  
     // The button at the bottom is prefixed either "add" or "save" depending on wich URL this Page is mapped against.
     @FindBy(css = "#add-user-button")
     private SelenideElement addUserButton;
     @FindBy(css = "#save-user-button")
     private SelenideElement saveUserButton;
+    
+    @FindBy(css = ".v-label-undef-w")
+    private SelenideElement messageField;    
+    
+            
+    
 
     public String getUserName(){
         return userNameField.getText();
@@ -77,6 +91,17 @@ public class AddOrEditUserPage extends MenuPage {
     
     public void setEmail(String email) {
         setTextFieldValue("email field", email, emailField);
+    }
+
+    public String getMessage(){
+        return messageField.getText();
+    }
+    
+    public void clickLibrarianRadioButton() {
+        
+        clickButton("librarian role radio button", librarianRadioButton);
+        WebElement element = new WebDriverWait(getWebDriver(), 30).until(ExpectedConditions.elementToBeClickable(librarianRadioButton));
+        element.sendKeys(Keys.SPACE);
     }
     
     public void clickAddUserButton() {

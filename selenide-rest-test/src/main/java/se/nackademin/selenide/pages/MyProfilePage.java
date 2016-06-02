@@ -29,6 +29,13 @@ public class MyProfilePage extends MenuPage {
     
     @FindBy(css = "#edit-user")
     private SelenideElement editUserButton;
+    
+    // Detete user button only visible for users of type "LIBRARIAN"
+    @FindBy(css = "#delete-user-button")
+    private SelenideElement deleteUserButton;
+    
+    @FindBy(css = "#confirmdialog-ok-button")
+    private SelenideElement confirmDeleteUserButton;   
 
     @FindBy(css = "td.v-grid-cell:nth-child(1) > a:nth-child(1)")
     private SelenideElement firstResultTitle;
@@ -57,6 +64,14 @@ public class MyProfilePage extends MenuPage {
     public void clickEditUserButton() {
         editUserButton.click();
     }
+    
+    public void clickDeleteUserButton() {
+        deleteUserButton.click();
+    }        
+    
+    public void clickConfirmDeleteUserOkButton() {
+        confirmDeleteUserButton.click();
+    } 
     
     public void clickFirstResultTitle() {
         firstResultTitle.click();

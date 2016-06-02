@@ -11,7 +11,7 @@ import org.openqa.selenium.support.FindBy;
 /**
  * @author testautomatisering
  */
-public class BookPage extends MenuPage {
+public class BookViewPage extends MenuPage {
 
     @FindBy(css = "#gwt-uid-3")
     private SelenideElement titleField;
@@ -32,7 +32,7 @@ public class BookPage extends MenuPage {
     
     @FindBy(css = "#edit-book-button")
     private SelenideElement editBookButton;
-    @FindBy(css="#confirmdialog-ok-button")
+    @FindBy(css = "#confirmdialog-ok-button")
     private SelenideElement confirmDialogOKButton;  
     
 

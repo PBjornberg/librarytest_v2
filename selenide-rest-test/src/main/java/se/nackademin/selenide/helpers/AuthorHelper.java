@@ -6,11 +6,14 @@
 package se.nackademin.selenide.helpers;
 
 import static com.codeborne.selenide.Selenide.page;
-import se.nackademin.gson.model.Author;
-import se.nackademin.selenide.pages.AddAuthorPage;
+import se.nackademin.selenide.model.Author;
+import se.nackademin.selenide.pages.AuthorAddPage;
 import se.nackademin.selenide.pages.AuthorPage;
-import se.nackademin.selenide.pages.BrowseAuthorsPage;
+import se.nackademin.selenide.pages.AuthorsBrowsePage;
 import se.nackademin.selenide.pages.MenuPage;
+import static com.codeborne.selenide.Selenide.page;
+import static com.codeborne.selenide.Selenide.page;
+import static com.codeborne.selenide.Selenide.page;
 
 /**
  *
@@ -21,7 +24,7 @@ public class AuthorHelper {
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToAddAuthor();
 
-        AddAuthorPage addAuthorPage = page(AddAuthorPage.class);
+        AuthorAddPage addAuthorPage = page(AuthorAddPage.class);
         addAuthorPage.setFirstNameField(firstName);
         addAuthorPage.setLasttNameField(lastName);
         addAuthorPage.setCountryField(country);
@@ -32,7 +35,7 @@ public class AuthorHelper {
     public static Author fetchAuthor(String searchQuery) {
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToBrowseAuthors();
-        BrowseAuthorsPage browseAuthorsPage = page(BrowseAuthorsPage.class);
+        AuthorsBrowsePage browseAuthorsPage = page(AuthorsBrowsePage.class);
         browseAuthorsPage.setNameField(searchQuery);
         browseAuthorsPage.clickSearchAuthorsButton();
         browseAuthorsPage.clickFirstResultTitle();

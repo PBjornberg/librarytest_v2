@@ -11,7 +11,7 @@ import org.openqa.selenium.support.FindBy;
 /**
  * @author testautomatisering
  */
-public class BrowseBooksPage extends MenuPage {
+public class BooksBrowsePage extends MenuPage {
     @FindBy(css = "#gwt-uid-3")
     private SelenideElement titleField;
     @FindBy(css = "#search-books-button")

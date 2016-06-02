@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.nackademin.gson.model;
+package se.nackademin.selenide.model;
 
 /**
  *

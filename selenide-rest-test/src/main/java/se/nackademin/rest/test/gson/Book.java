@@ -1,4 +1,4 @@
-package se.nackademin.rest.test.model;
+package se.nackademin.rest.test.gson;
 
 public class Book {
     

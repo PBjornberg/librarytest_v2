@@ -12,7 +12,7 @@ import org.openqa.selenium.support.FindBy;
  *
  * @author administrator
  */
-public class BrowseAuthorsPage {
+public class AuthorsBrowsePage {
     @FindBy(css = "#gwt-uid-3")
     private SelenideElement nameField;
     @FindBy(css = "#search-authors-button")

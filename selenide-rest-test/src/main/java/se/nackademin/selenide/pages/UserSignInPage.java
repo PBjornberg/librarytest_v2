@@ -11,7 +11,7 @@ import org.openqa.selenium.support.FindBy;
 /**
  * @author testautomatisering
  */
-public class SignInPage extends MenuPage {
+public class UserSignInPage extends MenuPage {
     @FindBy(css = "#input-username")
     private SelenideElement userNameField;
     @FindBy(css = "#input-password")

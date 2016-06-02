@@ -6,10 +6,13 @@
 package se.nackademin.selenide.helpers;
 
 
-import se.nackademin.selenide.pages.BookPage;
-import se.nackademin.selenide.pages.BrowseBooksPage;
-import se.nackademin.selenide.pages.EditBookPage;
+import se.nackademin.selenide.pages.BookViewPage;
+import se.nackademin.selenide.pages.BooksBrowsePage;
+import se.nackademin.selenide.pages.BookFormPage;
 import se.nackademin.selenide.pages.MenuPage;
+import static com.codeborne.selenide.Selenide.page;
+import static com.codeborne.selenide.Selenide.page;
+import static com.codeborne.selenide.Selenide.page;
 import static com.codeborne.selenide.Selenide.page;
 
 /**
@@ -24,17 +27,53 @@ public class BookHelper {
      * @param searchQuery
      * @return 
      */
-    public static BookPage fetchBookPage(String searchQuery) {
+    public static BookViewPage fetchBookPage(String searchQuery) {
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToBrowseBooks();
-        BrowseBooksPage browseBooksPage = page(BrowseBooksPage.class);
+        BooksBrowsePage browseBooksPage = page(BooksBrowsePage.class);
         browseBooksPage.setTitleField(searchQuery);
         browseBooksPage.clickSearchBooksButton();
         browseBooksPage.clickFirstResultTitle();
 
-        BookPage bookPage = page(BookPage.class);
+        BookViewPage bookPage = page(BookViewPage.class);
         return bookPage;
     }
+
+
+    /**
+     * Creates a new book. Author will be Terry Pratchett (the only author beginning with the letter "T")
+     * 
+     * @param title The new title for this book
+     * @param description
+     * @param numberOfPages
+     * @param isbn
+     * @param numberInInventory
+     * @param datePublished
+     */
+    public static void createBook(String title,
+            String description, 
+            String numberOfPages, 
+            String isbn,
+            String numberInInventory,
+            String datePublished) {
+                
+        BookFormPage addBookPage = page(BookFormPage.class);
+        
+        addBookPage.setTitle(title);
+        addBookPage.setDescription(description);       
+        addBookPage.setDatePublished(datePublished);
+        
+        // Add first author with a name beginning with the letter "T"
+        addBookPage.sendKeysToAvailabelAuthorsList("T");
+        addBookPage.clickAddAuthorButton();
+
+        // Other properties omitted for simplicity
+        
+        addBookPage.clickAddBookButton();        
+    }
+
+
+
     
     /**
      * Updates book with given title. 
@@ -56,10 +95,10 @@ public class BookHelper {
             String numberInInventory,
             String datePublished) {
         
-        BookPage bookPage = fetchBookPage(searchTitle);        
+        BookViewPage bookPage = fetchBookPage(searchTitle);        
         bookPage.clickEditBookButton();
         
-        EditBookPage editBookPage = page(EditBookPage.class);
+        BookFormPage editBookPage = page(BookFormPage.class);
         
         if (newTitle!=null) { editBookPage.setTitle(newTitle); }
         if (description!=null) { editBookPage.setDescription(description); }        
@@ -71,14 +110,14 @@ public class BookHelper {
     
     public static void borrowBook(String searchTitle) {
         
-        BookPage bookPage = fetchBookPage(searchTitle);
+        BookViewPage bookPage = fetchBookPage(searchTitle);
         bookPage.clickBorrowBookButton();
         bookPage.clickConfirmDialogOKButton();
     }
     
     public static void returnBook(String searchTitle) {
         
-        BookPage bookPage = fetchBookPage(searchTitle);
+        BookViewPage bookPage = fetchBookPage(searchTitle);
         bookPage.clickReturnBookButton();
         bookPage.clickConfirmDialogOKButton();
     }

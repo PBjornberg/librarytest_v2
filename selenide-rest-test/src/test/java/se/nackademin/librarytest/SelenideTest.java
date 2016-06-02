@@ -10,14 +10,19 @@ import org.junit.Test;
 import se.nackademin.selenide.helpers.AuthorHelper;
 import se.nackademin.selenide.helpers.BookHelper;
 import se.nackademin.selenide.helpers.UserHelper;
-import se.nackademin.gson.model.Author;
-import se.nackademin.gson.model.User;
-import se.nackademin.selenide.pages.BookPage;
+import se.nackademin.selenide.model.Author;
+import se.nackademin.selenide.model.User;
+import se.nackademin.selenide.pages.BookViewPage;
 import se.nackademin.selenide.pages.MenuPage;
 import se.nackademin.selenide.pages.MyProfilePage;
 import static com.codeborne.selenide.Selenide.sleep;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static com.codeborne.selenide.Selenide.page;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+import se.nackademin.selenide.pages.UserFormPage;
 
 public class SelenideTest extends SelenideTestBase {
 
@@ -56,7 +61,7 @@ public class SelenideTest extends SelenideTestBase {
         String country = "USA";
 
         // Log in as admin user and create new author
-        UserHelper.logInAsUser("admin", "1234567890");        
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);        
         AuthorHelper.createNewAuthor(firstName, lastName, country, biography);
 
         // Verify fetched author
@@ -66,6 +71,30 @@ public class SelenideTest extends SelenideTestBase {
         assertEquals(biography, author.getBiography());
     }
 
+    
+    /**
+     * Skapa användare, logga in - logga ut
+     */
+    @Test
+    public void testSignInAndSignOut(){
+        
+        // Sign in
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        
+        // Verify there is a link to the profile page
+        MenuPage menuPage = page(MenuPage.class); 
+        
+        menuPage.waitForProfileLinkToShow();
+        assertTrue("Link to profile page is not visible",menuPage.isMyProfileLinkVisibel());
+
+        // Sign out        
+        menuPage.clickSignOut();
+        // Verify there is NO link to the profile page        
+        assertFalse("Link to profile page should not be visible",menuPage.isMyProfileLinkVisibel());
+        
+      
+    }    
+    
     /**
      * Ändra e-mailadress
      */
@@ -78,7 +107,7 @@ public class SelenideTest extends SelenideTestBase {
         User user;
         
         // Create user
-        UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", oldEmail);
+        UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", oldEmail, false);
         
         // Verify email is correctly set
         user = UserHelper.fetchUser(uuid, uuid);        
@@ -91,6 +120,35 @@ public class SelenideTest extends SelenideTestBase {
         user = UserHelper.fetchUser(uuid, uuid);
         assertEquals(newEmail, user.getEmail());        
     }
+
+
+    /**
+     * Skapa ny bok
+     */
+    @Test
+    public void testAddBook(){
+        
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String datePublished = df.format(new Date());
+        final String title = UUID.randomUUID().toString();        
+        final String description = "Lorem ipsum dolor sit amet, sit te tation putent.";  
+        final String expectedAuthor = "Terry Pratchett";
+        
+        // Log in as admin user
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        
+        // Crate a nw book
+        MenuPage menuPage = page(MenuPage.class);
+        menuPage.navigateToAddBook();
+        BookHelper.createBook(title, description, null, null, null, datePublished); 
+
+        BookViewPage bp = BookHelper.fetchBookPage(title);
+        
+        assertEquals(title, bp.getTitle());
+        assertEquals(description, bp.getDescription());   
+        assertEquals(expectedAuthor, bp.getAuthor());
+    }
+    
     
     /**
      * Ändra publiceringsdatum
@@ -104,7 +162,7 @@ public class SelenideTest extends SelenideTestBase {
         final String bookTitle = "Good Omens";         
         
         // Log in as admin user
-        UserHelper.logInAsUser("admin", "1234567890");
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
         
         // We dont know for sure what "date published" the book has
         // Therefore, we must change the value twice
@@ -116,17 +174,17 @@ public class SelenideTest extends SelenideTestBase {
     }
     
     /**
-    * Låna en bok
+    * Skapa användare och låna en bok
     */
     @Test
     public void testCreateUserAndBorrowBook(){
 
         final String uuid = UUID.randomUUID().toString();
-        UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", "mail.address@server.com");
+        UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", "mail.address@server.com", false);
         UserHelper.logInAsUser(uuid, uuid);
 
         final String bookTitle = "Coraline";
-        BookPage bookPage;
+        BookViewPage bookPage;
         
         // Save the number of available books
         bookPage = BookHelper.fetchBookPage(bookTitle);
@@ -153,6 +211,39 @@ public class SelenideTest extends SelenideTestBase {
         // For some reason, we need to wait a moment        
         sleep(1000);
         assertEquals("Number of copies availabe is wrong", originalNbrOfCopiesAvailable, Integer.parseInt(bookPage.getNbrOfCopiesAvailable()));
+        
+    }
+    
+    /**
+    * Skapa librarian-användare
+    */
+    @Test
+    public void testCreateLibrarianUser(){
+
+        // Log in as admin user
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        final String uuid = UUID.randomUUID().toString();
+        UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", "admin@server.com", true);
+        UserHelper.logInAsUser(uuid, uuid);
+        
+        MenuPage menuPage = page(MenuPage.class);
+        menuPage.navigateToMyProfile();    
+        
+        MyProfilePage myProfilePage = page(MyProfilePage.class);
+        myProfilePage.clickDeleteUserButton();
+        myProfilePage.clickConfirmDeleteUserOkButton();
+        
+    }
+    
+    /**
+    * Skapa användare med redan upptaget "Display Name"
+    */
+    @Test
+    public void testCreateUserWithDisplayNameAlreadyTaken(){
+
+        // Try to create user with display name "admin"
+        UserFormPage page = UserHelper.createNewUser(ADMIN_USER, ADMIN_PWD, "firstname", "lastname", "010 - 12345678", "admin@server.com", false);
+        assertThat(page.getMessage(), containsString("display name already exists"));
         
     }
     
