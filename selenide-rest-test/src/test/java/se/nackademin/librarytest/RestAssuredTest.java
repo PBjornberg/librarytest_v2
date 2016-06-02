@@ -7,7 +7,6 @@ import se.nackademin.rest.test.gson.Book;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import org.junit.After;
 import se.nackademin.rest.test.RestOperations;
 import se.nackademin.rest.test.gson.Author;
 import se.nackademin.rest.test.gson.Authors;
