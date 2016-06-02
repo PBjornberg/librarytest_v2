@@ -1,21 +1,19 @@
 package se.nackademin.rest.test.gson;
 
-import java.util.List;
-
 public class Loans {
-    private List <Loan> loan;
+    private Object loan;
 
     /**
-     * @return the list of Loan:s
+     * @return the Loan(s)
      */
-    public List <Loan> getLoanList() {
+    public Object getLoan() {
         return loan;
     }
 
     /**
-     * @param loan the list of Loans:s to set
+     * @param loan the Loans(s) to set
      */
-    public void setLoanList(List <Loan> loan) {
+    public void setLoan(Object loan) {
         this.loan = loan;
     }  
 }

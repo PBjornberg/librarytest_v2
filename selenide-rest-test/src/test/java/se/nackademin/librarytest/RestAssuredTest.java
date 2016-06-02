@@ -1,5 +1,6 @@
 package se.nackademin.librarytest;
 
+import com.google.gson.internal.LinkedTreeMap;
 import org.junit.Test;
 import com.jayway.restassured.response.Response;
 import java.util.List;
@@ -13,9 +14,9 @@ import se.nackademin.rest.test.gson.Authors;
 import se.nackademin.rest.test.gson.Books;
 import se.nackademin.rest.test.gson.User;
 import se.nackademin.rest.test.gson.Users;
-import static org.junit.Assert.assertEquals;
 import se.nackademin.rest.test.gson.Loan;
 import se.nackademin.rest.test.gson.Loans;
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -33,8 +34,8 @@ public class RestAssuredTest {
     public RestAssuredTest() {
     }
     
-    private static final String LIBRARIAN_TYPE = "LIBRARIAN";
-    private static final String LOANER_TYPE = "LOANER";
+    private static final String ROLE_LIBRARIAN = "LIBRARIAN";
+    private static final String ROLE_LOANER = "LOANER";
     
 
     @Test
@@ -42,13 +43,12 @@ public class RestAssuredTest {
 
         int statusCode;
         
-        statusCode = createUser(LIBRARIAN_TYPE);
+        statusCode = RestOperations.createRandomUser(ROLE_LIBRARIAN);
         assertEquals("Status code should be 201", 201, statusCode);        
-        User user = getLastUserFromDb();
         
         // Fetch the new User from database
-        RestOperations ro = new RestOperations();
-        Response getResponse = ro.getUser(user.getId());
+        User user = fetchLastUser();
+        Response getResponse = RestOperations.getUser(user.getId());
         assertEquals("Status code should be 200", 200, getResponse.statusCode()); 
         User fetchedUser = getResponse.jsonPath().getObject("user", User.class);
 
@@ -61,20 +61,18 @@ public class RestAssuredTest {
           
         int statusCode;
         
-        statusCode = createUser(LIBRARIAN_TYPE);
+        statusCode = RestOperations.createRandomUser(ROLE_LIBRARIAN);
         assertEquals("Status code should be 201", 201, statusCode);        
-        User user = getLastUserFromDb();
+        User user = fetchLastUser();
         
         final String NEW_FIRST_NAME = "New first name";
         user.setFirstName(NEW_FIRST_NAME);
 
-        RestOperations ro1 = new RestOperations();
-        Response putResponse = ro1.updateUser(user);
+        Response putResponse = RestOperations.updateUser(user);
         assertEquals("Status code should be 200", 200, putResponse.statusCode()); 
         
         // Verify that the user is updated in database
-        RestOperations ro2 = new RestOperations();
-        Response getResponse = ro2.getUser(user.getId());
+        Response getResponse = RestOperations.getUser(user.getId());
         assertEquals("Status code should be 200", 200, getResponse.statusCode()); 
         User fetchedUser = getResponse.jsonPath().getObject("user", User.class);
 
@@ -88,25 +86,22 @@ public class RestAssuredTest {
         
         int statusCode;
         
-        statusCode = createUser(LIBRARIAN_TYPE);
+        statusCode = RestOperations.createRandomUser(ROLE_LIBRARIAN);
         assertEquals("Status code should be 201", 201, statusCode);        
-        User user = getLastUserFromDb();
+        User user = fetchLastUser();
         
         // Remove the created User from database
-        RestOperations ro1 = new RestOperations();
-        Response deleteResponse = ro1.deleleUser(user.getId());
+        Response deleteResponse = RestOperations.deleleUser(user.getId());
         assertEquals("Status code should be 204", 204, deleteResponse.statusCode());            
     
         // Verify that the user is removed from database
-        RestOperations ro2 = new RestOperations();
-        Response getResponse = ro2.getUser(user.getId());
+        Response getResponse = RestOperations.getUser(user.getId());
         assertEquals("Status code should be 404", 404, getResponse.statusCode()); 
     }      
     
     @Test
     public void testReadNonExistingAuthor() {   
-        RestOperations ro = new RestOperations();    
-        Response getResponse = ro.getAuthor(0);
+        Response getResponse = RestOperations.getAuthor(0);
         assertEquals("Status code should be 404", 404, getResponse.statusCode()); 
     }
     
@@ -116,18 +111,16 @@ public class RestAssuredTest {
         int statusCode;
         
         // Create a random Author
-        statusCode = createAuthor();
+        statusCode = RestOperations.createRandomAuthor();
         assertEquals("Status code should be 201", 201, statusCode);        
         
         // Remove the new Author from database
-        Author authorToBeDeleted = getLastAuthorFromDb();
-        RestOperations ro1 = new RestOperations();
-        Response deleteResponse = ro1.deleleAuthor(authorToBeDeleted.getId());
+        Author authorToBeDeleted = fetchLastAuthor();
+        Response deleteResponse = RestOperations.deleleAuthor(authorToBeDeleted.getId());
         assertEquals("Status code should be 204", 204, deleteResponse.statusCode());            
     
         // Verify that the author is removed from database
-        RestOperations bo2 = new RestOperations();
-        Response getResponse = bo2.getAuthor(authorToBeDeleted.getId());
+        Response getResponse = RestOperations.getAuthor(authorToBeDeleted.getId());
         assertEquals("Status code should be 404", 404, getResponse.statusCode());    
     }
     
@@ -137,47 +130,44 @@ public class RestAssuredTest {
         int statusCode;
         
          // Create a random Author       
-        statusCode = createAuthor();
+        statusCode = RestOperations.createRandomAuthor();
         assertEquals("Status code should be 201", 201, statusCode);         
         
         // Get id of the new author from database
-        Author lastAuthor = getLastAuthorFromDb();
-        Integer id = lastAuthor.getId();
+        Author author = fetchLastAuthor();
+        Integer id = author.getId();
         
         // Update last author with a different first name
         String newAuthorName = UUID.randomUUID().toString();
-        lastAuthor.setFirstName(newAuthorName);
-        RestOperations ro1 = new RestOperations();
-        Response putResponse = ro1.updateAuthor(lastAuthor);      
-        assertEquals("Status code should be 200", 200, putResponse.statusCode());
+        author.setFirstName(newAuthorName);
+        statusCode = RestOperations.updateAuthor(author);      
+        assertEquals("Status code should be 200", 200, statusCode);
         
         // Fetch the updated author
-        RestOperations bo2 = new RestOperations();    
-        Response getResponse = bo2.getAuthor(id);
+        Response getResponse = RestOperations.getAuthor(id);
         assertEquals("Status code should be 200", 200, getResponse.statusCode());        
         
         // Verify that the authors's name has been updated in the database      
-        Author author = getResponse.jsonPath().getObject("author", Author.class);        
-        assertEquals(newAuthorName, author.getFirstName());
+        Author fetchedAuthor = getResponse.jsonPath().getObject("author", Author.class);        
+        assertEquals(newAuthorName, fetchedAuthor.getFirstName());
     }
 
     @Test
     public void testCreateNewBook() {
       
         // Create a new book, attached to the last existing author       
-        RestOperations ro = new RestOperations();    
-        Author lastAuthor = getLastAuthorFromDb();
-        ro.setAuthor(lastAuthor);
+        Author author = fetchLastAuthor();
         
-        Response postResponse2 = ro.createRandomBook();
-        assertEquals("Status code should be 201", 201, postResponse2.statusCode());
+        RestOperations ro = new RestOperations();        
+        int statusCode = ro.createRandomBook(author, 2);
+        assertEquals("Status code should be 201", 201, statusCode);
         // Get all data for the new Book
         String newDescription = ro.getBook().getDescription();
         String newIsbn = ro.getBook().getIsbn();
         Integer newNbOfPage = ro.getBook().getNbOfPage();        
         String newTitle = ro.getBook().getTitle();
 
-        Book newBook = getLastBookFromDb();
+        Book newBook = fetchLastBook();
 
         // Verify that the book fetched from database contains expected data
         assertEquals(newDescription, newBook.getDescription());        
@@ -187,13 +177,12 @@ public class RestAssuredTest {
         
         // Verify that the author has expected id
         Map authorMap = (Map)newBook.getAuthor();   
-        assertEquals((int)lastAuthor.getId(),Math.round((Double)authorMap.get("id")));        
+        assertEquals((int)author.getId(), Math.round((Double)authorMap.get("id")));        
     }
 
     @Test
     public void testReadNonExistingBook() {
-        RestOperations bo = new RestOperations();
-        Response getResponse = bo.getBook(0);
+        Response getResponse = RestOperations.getBook(0);
         assertEquals("Status code should be 404", 404, getResponse.statusCode());        
     }
     
@@ -203,27 +192,24 @@ public class RestAssuredTest {
         int statusCode;
         
         // Create and fetch a new Author
-        statusCode = createAuthor();
+        statusCode = RestOperations.createRandomAuthor();
         assertEquals("Status code should be 201", 201, statusCode);         
         
-        Author newAuthor = getLastAuthorFromDb();
+        Author newAuthor = fetchLastAuthor();
         
         // Create first book, attached to the created author       
         RestOperations ro1 = new RestOperations();    
-        ro1.setAuthor(newAuthor);       
-        Response postResponse1 = ro1.createRandomBook();        
-        assertEquals("Status code should be 201", 201, postResponse1.statusCode());
-        Integer idBook1 = getLastBookFromDb().getId();       
+        statusCode = ro1.createRandomBook(newAuthor, 2);        
+        assertEquals("Status code should be 201", 201, statusCode);
+        Integer idBook1 = fetchLastBook().getId();       
 
         // Create second book, attached to the created author       
         RestOperations ro2 = new RestOperations();    
-        ro2.setAuthor(newAuthor);
-        Response postResponse2 = ro2.createRandomBook();
-        assertEquals("Status code should be 201", 201, postResponse2.statusCode()); 
-        Integer idBook2 = getLastBookFromDb().getId();
+        statusCode = ro2.createRandomBook(newAuthor, 1);
+        assertEquals("Status code should be 201", 201, statusCode); 
+        Integer idBook2 = fetchLastBook().getId();
         
-        RestOperations bo3 = new RestOperations();
-        Response getResponse = bo3.getAllBooksByAuthor(newAuthor.getId()); 
+        Response getResponse = RestOperations.getAllBooksByAuthor(newAuthor.getId()); 
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
         
         // Pick the last book in the list
@@ -238,7 +224,7 @@ public class RestAssuredTest {
 
         int statusCode;
         
-        Book updatedBook = getLastBookFromDb();
+        Book updatedBook = fetchLastBook();
         
         // Save book.id locally
         Integer id = updatedBook.getId();
@@ -254,20 +240,18 @@ public class RestAssuredTest {
         updatedBook.setTitle(newTitle);
         
         // Create a random Author
-        statusCode = createAuthor();
+        statusCode = RestOperations.createRandomAuthor();
         assertEquals("Status code should be 201", 201, statusCode); 
                 
         // Get the new author from database
-        Author newAuthor = getLastAuthorFromDb(); 
+        Author newAuthor = fetchLastAuthor(); 
         updatedBook.setAuthor(newAuthor);
 
-        RestOperations bo3 = new RestOperations();
-        Response putResponse = bo3.updateBook(updatedBook);      
-        assertEquals("Status code should be 200", 200, putResponse.statusCode());        
+        statusCode = RestOperations.updateBook(updatedBook);      
+        assertEquals("Status code should be 200", 200, statusCode);        
         
         // Fetch the updated book
-        RestOperations bo4 = new RestOperations();        
-        Response getResponse = bo4.getBook(id);
+        Response getResponse = RestOperations.getBook(id);
         assertEquals("Status code should be 200", 200, getResponse.statusCode()); 
 
         // Verify that the book's data has been updated    
@@ -289,34 +273,32 @@ public class RestAssuredTest {
         int statusCode;
         
         // Get last book
-        Book updatedBook = getLastBookFromDb();
+        Book updatedBook = fetchLastBook();
         Integer bookId = updatedBook.getId();
         
         // Create first Author
-        statusCode = createAuthor();       
+        statusCode = RestOperations.createRandomAuthor();       
         assertEquals("Status code should be 201", 201, statusCode);
         
         // Get the new author from database
-        Author author1 = getLastAuthorFromDb();
+        Author author1 = fetchLastAuthor();
  
         // Replace any previous Author(s) with the new Author
         updatedBook.setAuthor(author1);
-        RestOperations bo1 = new RestOperations();
-        Response putResponse = bo1.updateBook(updatedBook);      
-        assertEquals("Status code should be 200", 200, putResponse.statusCode()); 
+        statusCode = RestOperations.updateBook(updatedBook);      
+        assertEquals("Status code should be 200", 200, statusCode); 
         
         // Create second Author        
-        statusCode = createAuthor();
+        statusCode = RestOperations.createRandomAuthor();
         assertEquals("Status code should be 201", 201, statusCode);
         
         // Get the new author from database
-        Author author2 = getLastAuthorFromDb();
-        Response postresponse2 = new RestOperations().addAuthorToBook(updatedBook.getId(), author2); 
-        assertEquals("Status code should be 200", 200, postresponse2.statusCode());  
+        Author author2 = fetchLastAuthor();
+        statusCode = RestOperations.addAuthorToBook(updatedBook.getId(), author2); 
+        assertEquals("Status code should be 200", 200, statusCode);  
  
         // Fetch the updated book
-        RestOperations bo2 = new RestOperations();        
-        Response getResponse = bo2.getBook(bookId);
+        Response getResponse = RestOperations.getBook(bookId);
         assertEquals("Status code should be 200", 200, getResponse.statusCode());            
 
         // Verify that the book has two different Authors attached
@@ -333,73 +315,67 @@ public class RestAssuredTest {
     public void testDeleteBook() {
         
         // Remove last book from database
-        Book bookToBeDeleted = getLastBookFromDb();
-        RestOperations ro1 = new RestOperations();
-        Response deleteResponse = ro1.deleleBook(bookToBeDeleted.getId());
-        assertEquals("Status code should be 204", 204, deleteResponse.statusCode());            
+        Book bookToBeDeleted = fetchLastBook();
+        int statusCode = RestOperations.deleleBook(bookToBeDeleted.getId());
+        assertEquals("Status code should be 204", 204, statusCode);            
     
         // Verify that the book is removed from database
-        RestOperations ro2 = new RestOperations();
-        Response getResponse = ro2.getBook(bookToBeDeleted.getId());
+        Response getResponse = RestOperations.getBook(bookToBeDeleted.getId());
         assertEquals("Status code should be 404", 404, getResponse.statusCode());         
     }
     
     @Test
     public void testCreateAndDeleteLoan() {
-      
-        // Create a new laon, attached to the last existing book/user      
-        RestOperations ro = new RestOperations();    
-        Book book = getLastBookFromDb();
-        User user = getLastUserFromDb();
-        final String DATE_BORROWED = "2016-02-24";
-        final String DATE_DUE = "2016-03-20";        
+    
+        // Create a new book, (number of copies in library = 1)     
+        RestOperations ro1 = new RestOperations();    
+        int statusCode = ro1.createRandomBook(null,1);
+        assertEquals("Status code should be 201", 201, statusCode);
+        Book book = fetchLastBook();
         
-        Response postResponse = ro.createLoan(book, user, DATE_BORROWED, DATE_DUE);
-        assertEquals("Status code should be 201", 201, postResponse.statusCode());
+        // Create a new user
+        statusCode = RestOperations.createRandomUser(ROLE_LOANER);
+        assertEquals(201, statusCode);
+        User user = fetchLastUser();
+
+        // Create a new Loan with the new book and the new user      
+        final String DATE_BORROWED_1 = "2016-02-24";
+        final String DATE_DUE_1 = "2016-03-20";        
+        statusCode = RestOperations.createLoan(book, user, DATE_BORROWED_1, DATE_DUE_1);
+        assertEquals("Status code should be 201", 201, statusCode);
         
-        Loan loan = getLastLoanFromDb();
+        Loan loan = fetchLastLoanOfBook(book.getId());
         
-        assertEquals(book.getId(), loan.getBook().getId());
-        assertEquals(user.getId(), loan.getUser().getId());
-        assertEquals(DATE_BORROWED, loan.getDateBorrowed());
-        assertEquals(DATE_DUE, loan.getDateDue());
+        assertEquals(DATE_BORROWED_1, loan.getDateBorrowed());
+        assertEquals(DATE_DUE_1, loan.getDateDue());
+                
+        // Create a second user
+        statusCode = RestOperations.createRandomUser(ROLE_LOANER);
+        assertEquals(201, statusCode);
+        User user2 = fetchLastUser();
         
-        ro.deleleLoan(loan.getId());
+        // Try to create another Loan with the same book and the second user  
+        final String DATE_BORROWED_2 = "2016-03-25";
+        final String DATE_DUE_2 = "2016-04-21";        
+        statusCode = RestOperations.createLoan(book, user2, DATE_BORROWED_2, DATE_DUE_2);
+        assertEquals("Status code should be 409", 409, statusCode);
         
-        RestOperations ro2 = new RestOperations();
-        Response getResponse = ro2.getLoan(loan.getId());
+        loan = fetchLastLoanOfBook(book.getId());
+        statusCode = RestOperations.deleleLoan(loan.getId());
+        assertEquals("Status code should be 204", 204, statusCode);
+        
+        Response getResponse = RestOperations.getLoan(loan.getId());
         assertEquals("Status code should be 404", 404, getResponse.statusCode());        
         
     }    
- 
-     /**
-     * Utility method for creating User populated with random data 
-     * @return Status code from http response
-     */
-    private int createUser(String role) {
-        RestOperations ro = new RestOperations();
-        Response postResponse = ro.createRandomUser(role);
-        return postResponse.statusCode();
-    }
-    
-     /**
-     * Utility method for creating Author populated with random data 
-     * @return Status code from http response
-     */
-    private int createAuthor() {
-        RestOperations ro = new RestOperations();
-        Response postResponse = ro.createRandomAuthor();
-        return postResponse.statusCode();
-    }
     
      /**
      * Utility method for fetching the last added User
      * @return The last User in the database 
      */
-    private User getLastUserFromDb() {
+    private User fetchLastUser() {
         // Fetch all users (in order to get the last one)
-        RestOperations ro = new RestOperations();
-        Response getResponse = ro.getAllUsers();
+        Response getResponse = RestOperations.getAllUsers();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
         Users users = getResponse.jsonPath().getObject("users", Users.class);
         // Pick the last author from the list of users
@@ -410,10 +386,9 @@ public class RestAssuredTest {
      * Utility method for fetching the last added Author
      * @return The last Author in the database 
      */
-    private Author getLastAuthorFromDb() {
+    private Author fetchLastAuthor() {
         // Fetch all authors (in order to get the last one)
-        RestOperations ro = new RestOperations();
-        Response getResponse = ro.getAllAuthors();
+        Response getResponse = RestOperations.getAllAuthors();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
         Authors authors = getResponse.jsonPath().getObject("authors", Authors.class);
         // Pick the last author from the list of authors
@@ -424,10 +399,9 @@ public class RestAssuredTest {
      * Utility method for fetching the last added Book
      * @return The last Book in the database 
      */    
-    private Book getLastBookFromDb() {
+    private Book fetchLastBook() {
         // Read all books from database
-        RestOperations ro = new RestOperations();
-        Response getResponse = ro.getAllBooks();
+        Response getResponse = RestOperations.getAllBooks();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
         // Pick the last book in the list
         Books books = getResponse.jsonPath().getObject("books", Books.class);
@@ -435,16 +409,35 @@ public class RestAssuredTest {
     }
     
      /**
-     * Utility method for fetching the last added Loan
+     * Utility method for fetching the last Loan for given User
      * @return The last Loan in the database 
      */    
-    private Loan getLastLoanFromDb() {
+    private Loan fetchLastLoanOfBook(int id) {
         // Read all loans from database
-        RestOperations ro = new RestOperations();
-        Response getResponse = ro.getAllLoans();
+        Response getResponse = RestOperations.getLoansOfBook(id);
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
-        // Pick the last book in the list
+
         Loans loans = getResponse.jsonPath().prettyPeek().getObject("loans", Loans.class);
-        return loans.getLoanList().get(loans.getLoanList().size()-1);
+        
+        Loan loan = null;
+        Map loanMap = null;
+        
+        // Gson deserialisation results in either
+        //  - a LinkedTreeMAp
+        //  - a List of LinkedTreeMap:s
+        if (loans.getLoan() instanceof LinkedTreeMap){
+            loanMap = (Map)loans.getLoan();
+
+        } else if (loans.getLoan() instanceof List) {
+            List loanList = (List)loans.getLoan();
+            loanMap = (Map)loanList.get(loanList.size()-1);
+        }
+        loan = new Loan();
+        loan.setId(((Double)loanMap.get("id")).intValue());
+        loan.setDateBorrowed((String)loanMap.get("dateBorrowed"));
+        loan.setDateDue((String)loanMap.get("dateDue")); 
+        // Book and User objects omitted for simplicity
+        
+        return loan;
     }
 }

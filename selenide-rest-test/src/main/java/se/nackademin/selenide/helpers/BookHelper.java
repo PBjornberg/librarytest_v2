@@ -11,9 +11,6 @@ import se.nackademin.selenide.pages.BooksBrowsePage;
 import se.nackademin.selenide.pages.BookFormPage;
 import se.nackademin.selenide.pages.MenuPage;
 import static com.codeborne.selenide.Selenide.page;
-import static com.codeborne.selenide.Selenide.page;
-import static com.codeborne.selenide.Selenide.page;
-import static com.codeborne.selenide.Selenide.page;
 
 /**
  * @author testautomatisering
