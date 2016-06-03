@@ -11,6 +11,7 @@ import se.nackademin.selenide.pages.BooksBrowsePage;
 import se.nackademin.selenide.pages.BookFormPage;
 import se.nackademin.selenide.pages.MenuPage;
 import static com.codeborne.selenide.Selenide.page;
+import static com.codeborne.selenide.Selenide.sleep;
 
 /**
  * @author testautomatisering
@@ -27,7 +28,9 @@ public class BookHelper {
     public static BookViewPage fetchBookPage(String searchQuery) {
         MenuPage menuPage = page(MenuPage.class);
         menuPage.navigateToBrowseBooks();
+        sleep(2000);
         BooksBrowsePage browseBooksPage = page(BooksBrowsePage.class);
+        sleep(2000);
         browseBooksPage.setTitleField(searchQuery);
         browseBooksPage.clickSearchBooksButton();
         browseBooksPage.clickFirstResultTitle();

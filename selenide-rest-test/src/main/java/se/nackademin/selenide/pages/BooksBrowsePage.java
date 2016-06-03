@@ -25,7 +25,6 @@ public class BooksBrowsePage extends MenuPage {
     }
 
     public void setTitleField(String title) {
-        sleep(2000);
         setTextFieldValue("title field", title, titleField);
     }
 

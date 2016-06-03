@@ -212,7 +212,8 @@ public class SelenideTest extends SelenideTestBase {
         // Borrow book
         BookHelper.borrowBook(bookTitle);
 
-        // Verify that the number of available boos is decremeted by one
+        // Verify that the number of available books is decremeted by one
+        sleep(2000);
         BookViewPage bookPage = BookHelper.fetchBookPage(bookTitle);        
         int nbrOfCopiesAvailable = Integer.parseInt(bookPage.getNbrOfCopiesAvailable()); 
         // For some reason, we need to wait a moment
