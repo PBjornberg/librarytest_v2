@@ -5,6 +5,7 @@
  */
 package se.nackademin.selenide.pages;
 
+import static com.codeborne.selenide.Selenide.sleep;
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -24,6 +25,7 @@ public class BooksBrowsePage extends MenuPage {
     }
 
     public void setTitleField(String title) {
+        sleep(2000);
         setTextFieldValue("title field", title, titleField);
     }
 
