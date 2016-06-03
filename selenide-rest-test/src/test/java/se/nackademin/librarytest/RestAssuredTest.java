@@ -374,6 +374,7 @@ public class RestAssuredTest {
      * @return The last User in the database 
      */
     private User fetchLastUser() {
+        
         // Fetch all users (in order to get the last one)
         Response getResponse = RestOperations.getAllUsers();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
@@ -387,6 +388,7 @@ public class RestAssuredTest {
      * @return The last Author in the database 
      */
     private Author fetchLastAuthor() {
+        
         // Fetch all authors (in order to get the last one)
         Response getResponse = RestOperations.getAllAuthors();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
@@ -400,6 +402,7 @@ public class RestAssuredTest {
      * @return The last Book in the database 
      */    
     private Book fetchLastBook() {
+        
         // Read all books from database
         Response getResponse = RestOperations.getAllBooks();
         assertEquals("Status code should be 200", 200, getResponse.statusCode());
@@ -413,6 +416,7 @@ public class RestAssuredTest {
      * @return The last Loan in the database 
      */    
     private Loan fetchLastLoanOfBook(int id) {
+        
         // Read all loans from database
         Response getResponse = RestOperations.getLoansOfBook(id);
         assertEquals("Status code should be 200", 200, getResponse.statusCode());

@@ -85,6 +85,9 @@ public class SelenideTest extends SelenideTestBase {
         MenuPage menuPage = page(MenuPage.class); 
         
         menuPage.waitForProfileLinkToShow();
+        
+        // For some reason, we must wait a while
+        sleep(1000);
         assertTrue("Link to profile page is not visible",menuPage.isMyProfileLinkVisibel());
 
         // Sign out        

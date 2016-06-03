@@ -136,7 +136,7 @@ public class RestOperations {
     }
     
     /**
-     * @return the book
+     * @return the book that was created with random data (before Rest call)
      */
     public Book getBook(){
         return book;
