@@ -16,13 +16,15 @@ import se.nackademin.selenide.pages.BookViewPage;
 import se.nackademin.selenide.pages.MenuPage;
 import se.nackademin.selenide.pages.MyProfilePage;
 import static com.codeborne.selenide.Selenide.sleep;
+import static org.hamcrest.CoreMatchers.containsString;
+import se.nackademin.selenide.pages.UserFormPage;
+import static se.nackademin.librarytest.Constants.ADMIN_PWD;
+import static se.nackademin.librarytest.Constants.ADMIN_USER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static com.codeborne.selenide.Selenide.page;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
-import se.nackademin.selenide.pages.UserFormPage;
+import static com.codeborne.selenide.Selenide.page;
 
 public class SelenideTest extends SelenideTestBase {
 
@@ -88,12 +90,12 @@ public class SelenideTest extends SelenideTestBase {
         
         // For some reason, we must wait a while
         sleep(1000);
-        assertTrue("Link to profile page is not visible",menuPage.isMyProfileLinkVisibel());
+        assertTrue("Link to profile page is not visible",menuPage.isMyProfileLinkDisplayed());
 
         // Sign out        
         menuPage.clickSignOut();
         // Verify there is NO link to the profile page        
-        assertFalse("Link to profile page should not be visible",menuPage.isMyProfileLinkVisibel());
+        assertFalse("Link to profile page should not be visible",menuPage.isMyProfileLinkDisplayed());
         
       
     }    
@@ -141,9 +143,7 @@ public class SelenideTest extends SelenideTestBase {
         UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
         
         // Crate a nw book
-        MenuPage menuPage = page(MenuPage.class);
-        menuPage.navigateToAddBook();
-        BookHelper.createBook(title, description, null, null, null, datePublished); 
+        BookHelper.createBook(title, description, null, null, "1", datePublished); 
 
         BookViewPage bp = BookHelper.fetchBookPage(title);
         
@@ -177,44 +177,54 @@ public class SelenideTest extends SelenideTestBase {
     }
     
     /**
-    * Skapa användare och låna en bok
+    * Skapa en ny bok
+    * Låna den nya boken (som LIBRARIAN)
+    * Logga in som LOANER och kolla att det inte går att låna boken
+    * Logga in med samma användare som lånade boken och lämna tillbaka den
     */
     @Test
     public void testCreateUserAndBorrowBook(){
 
-        final String uuid = UUID.randomUUID().toString();
-        UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", "mail.address@server.com", false);
-        UserHelper.logInAsUser(uuid, uuid);
+        // Log in with LIBRARIAN privileges
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
 
-        final String bookTitle = "Coraline";
-        BookViewPage bookPage;
-        
-        // Save the number of available books
-        bookPage = BookHelper.fetchBookPage(bookTitle);
-        int originalNbrOfCopiesAvailable = Integer.parseInt(bookPage.getNbrOfCopiesAvailable()); 
+        final String bookTitle = UUID.randomUUID().toString();
+
+        // Crate a nw book (Nbr of books in inventory = 1)
+        final int nbrInInventory = 1;
+        BookHelper.createBook(bookTitle, "Description", null, null, String.valueOf(nbrInInventory), "2016-06-03"); 
         
         // Borrow book
         BookHelper.borrowBook(bookTitle);
 
         // Verify that the number of available boos is decremeted by one
+        BookViewPage bookPage = BookHelper.fetchBookPage(bookTitle);        
+        int nbrOfCopiesAvailable = Integer.parseInt(bookPage.getNbrOfCopiesAvailable()); 
         // For some reason, we need to wait a moment
-        sleep(1000);
-        assertEquals("Number of copies availabe is not decremented", originalNbrOfCopiesAvailable - 1, Integer.parseInt(bookPage.getNbrOfCopiesAvailable()));
+        // sleep(1000);
+        assertEquals("Number of copies availabe is not decremented", nbrInInventory - 1, nbrOfCopiesAvailable);
         
-        MenuPage menuPage = page(MenuPage.class);
-        menuPage.navigateToMyProfile();        
-        MyProfilePage myProfilePage = page(MyProfilePage.class); 
-        myProfilePage.clickFirstResultTitle(); 
-        bookPage.waitForPageToLoad();
-        assertEquals(bookTitle, bookPage.getTitle());
+        // View the same book, from a different user
+        String uuid = UUID.randomUUID().toString();
+        UserHelper.createNewUser(uuid, uuid, null, null, null, null, false); 
+        UserHelper.logInAsUser(uuid, uuid);
+        
+        bookPage = BookHelper.fetchBookPage(bookTitle);        
+        // Verify that there are no available copies of the book and there is no "Borrow Book" button
+        assertEquals("Number of copies available should be zero", 0, Integer.parseInt(bookPage.getNbrOfCopiesAvailable()));
+        assertFalse("Borrow Book-button should not be visible", bookPage.isBorrowBookButtonDisplayed());
+        
+        // Log in as admin again
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);        
         
         // Return book
         BookHelper.returnBook(bookTitle);
         
         // Verify that the number of available boos is restored to original value
         // For some reason, we need to wait a moment        
-        sleep(1000);
-        assertEquals("Number of copies availabe is wrong", originalNbrOfCopiesAvailable, Integer.parseInt(bookPage.getNbrOfCopiesAvailable()));
+        // sleep(1000);
+        bookPage = BookHelper.fetchBookPage(bookTitle); 
+        assertEquals("Number of copies availabe is wrong", nbrInInventory, Integer.parseInt(bookPage.getNbrOfCopiesAvailable()));
         
     }
     
@@ -250,5 +260,46 @@ public class SelenideTest extends SelenideTestBase {
         assertThat(page.getMessage(), containsString("display name already exists"));
         
     }
+    
+    @Test
+    public void verifyLinksAndButtonsForLoaner(){
+        
+        String uuid = UUID.randomUUID().toString();
+
+        // Create User with role "LOANER"
+        UserHelper.createNewUser(uuid, uuid, null, null, null, null, false); 
+        UserHelper.logInAsUser(uuid,uuid);
+        
+        MenuPage menuPage = page(MenuPage.class);
+        sleep(2000);
+        assertFalse("Add Book link should not be visible for LOANER", menuPage.isAddBookLinkDisplayed());
+        assertFalse("Add Author link should not be visible for LOANER", menuPage.isAddAuthorLinkDisplayed());        
+        assertFalse("Add User link should not be visible for LOANER", menuPage.isAddUserLinkDisplayed()); 
+        assertTrue("My Profile link should be visible for LOANER", menuPage.isMyProfileLinkDisplayed());
+
+        menuPage.navigateToMyProfile();
+        MyProfilePage myProfilePage = page(MyProfilePage.class);
+        sleep(2000);        
+        assertFalse("Delete User-button should not be visible for LOANER", myProfilePage.isDeleteUserButtonDisplayed());        
+    }
+    
+    @Test
+    public void verifyMenuLinksAndButtonsForLibrarian(){
+        
+        // Log in with role "LIBRARIAN"
+        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        
+        MenuPage menuPage = page(MenuPage.class);
+        sleep(2000);
+        assertTrue("Add Book link should be visible for LIBRARIAN", menuPage.isAddBookLinkDisplayed());
+        assertTrue("Add Author link should be visible for LIBRARIAN", menuPage.isAddAuthorLinkDisplayed());        
+        assertTrue("Add User link should be visible for LIBRARIAN", menuPage.isAddUserLinkDisplayed()); 
+        assertTrue("My Profile link should be visible for LIBRARIAN", menuPage.isMyProfileLinkDisplayed()); 
+
+        menuPage.navigateToMyProfile();
+        MyProfilePage myProfilePage = page(MyProfilePage.class);
+        sleep(2000);
+        assertTrue("Delete User-button should be visible for LIBRARIAN", myProfilePage.isDeleteUserButtonDisplayed());
+    }    
     
 }

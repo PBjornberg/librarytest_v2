@@ -16,6 +16,8 @@ import se.nackademin.rest.test.gson.User;
 import se.nackademin.rest.test.gson.Users;
 import se.nackademin.rest.test.gson.Loan;
 import se.nackademin.rest.test.gson.Loans;
+import static se.nackademin.librarytest.Constants.ROLE_LIBRARIAN;
+import static se.nackademin.librarytest.Constants.ROLE_LOANER;
 import static org.junit.Assert.assertEquals;
 
 
@@ -33,9 +35,6 @@ public class RestAssuredTest {
 
     public RestAssuredTest() {
     }
-    
-    private static final String ROLE_LIBRARIAN = "LIBRARIAN";
-    private static final String ROLE_LOANER = "LOANER";
     
 
     @Test
@@ -65,8 +64,8 @@ public class RestAssuredTest {
         assertEquals("Status code should be 201", 201, statusCode);        
         User user = fetchLastUser();
         
-        final String NEW_FIRST_NAME = "New first name";
-        user.setFirstName(NEW_FIRST_NAME);
+        final String newFirstName = "New first name";
+        user.setFirstName(newFirstName);
 
         Response putResponse = RestOperations.updateUser(user);
         assertEquals("Status code should be 200", 200, putResponse.statusCode()); 
@@ -78,7 +77,7 @@ public class RestAssuredTest {
 
         // Verify that displayname in unchanged, wheres first name is modified
         assertEquals(user.getDisplayName(),fetchedUser.getDisplayName());
-        assertEquals(NEW_FIRST_NAME, fetchedUser.getFirstName());
+        assertEquals(newFirstName, fetchedUser.getFirstName());
     }   
     
     @Test

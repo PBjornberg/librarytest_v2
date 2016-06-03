@@ -21,7 +21,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class MenuPage extends PageBase {
 
     private static final Logger LOG = Logger.getLogger(MenuPage.class.getName());
-
+    
     @FindBy(css = "#side-menu-link-browse-books")
     private SelenideElement browseBooks;
     @FindBy(css = "#side-menu-link-browse-authors")
@@ -76,10 +76,34 @@ public class MenuPage extends PageBase {
     }
     
     /**
-     * Checks whether ProfileLink is visible or not
-     * @return flag signaling the visibility of Profile Link in menu
+     * Checks whether addBook link is visible or not
+     * @return flag signaling the visibility of Add Book link in menu
      */
-    public boolean isMyProfileLinkVisibel() {
+    public boolean isAddBookLinkDisplayed() {
+        return addBook.isDisplayed();
+    }
+    
+     /**
+     * Checks whether addAuthor link is visible or not
+     * @return flag signaling the visibility of Add Author link in menu
+     */
+    public boolean isAddAuthorLinkDisplayed() {
+        return addAuthor.isDisplayed();
+    }  
+    
+     /**
+     * Checks whether addUser link is visible or not
+     * @return flag signaling the visibility of Add User link in menu
+     */
+    public boolean isAddUserLinkDisplayed() {
+        return addUser.isDisplayed();
+    }  
+    
+    /**
+     * Checks whether myProfile link is visible or not
+     * @return flag signaling the visibility of My Profile link in menu
+     */
+    public boolean isMyProfileLinkDisplayed() {
         return myProfile.isDisplayed();
     }
     

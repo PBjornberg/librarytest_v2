@@ -75,5 +75,13 @@ public class MyProfilePage extends MenuPage {
     
     public void clickFirstResultTitle() {
         firstResultTitle.click();
-    }    
+    }
+    
+     /**
+     * Checks whether deleteUserButton is visible or not
+     * @return flag signaling the visibility of "Delete User" button
+     */
+    public boolean isDeleteUserButtonDisplayed() {
+        return deleteUserButton.isDisplayed();
+    }  
 }

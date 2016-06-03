@@ -5,13 +5,11 @@
  */
 package se.nackademin.selenide.helpers;
 
-import static com.codeborne.selenide.Selenide.page;
 import se.nackademin.selenide.model.Author;
 import se.nackademin.selenide.pages.AuthorAddPage;
 import se.nackademin.selenide.pages.AuthorPage;
 import se.nackademin.selenide.pages.AuthorsBrowsePage;
 import se.nackademin.selenide.pages.MenuPage;
-import static com.codeborne.selenide.Selenide.page;
 import static com.codeborne.selenide.Selenide.page;
 import static com.codeborne.selenide.Selenide.page;
 

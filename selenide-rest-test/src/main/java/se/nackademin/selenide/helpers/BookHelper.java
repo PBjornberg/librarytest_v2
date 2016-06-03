@@ -44,21 +44,24 @@ public class BookHelper {
      * @param description
      * @param numberOfPages
      * @param isbn
-     * @param numberInInventory
+     * @param nbrInInventory
      * @param datePublished
      */
     public static void createBook(String title,
             String description, 
             String numberOfPages, 
             String isbn,
-            String numberInInventory,
+            String nbrInInventory,
             String datePublished) {
-                
+        
+        MenuPage menuPage = page(MenuPage.class);
+        menuPage.navigateToAddBook();        
         BookFormPage addBookPage = page(BookFormPage.class);
         
         addBookPage.setTitle(title);
         addBookPage.setDescription(description);       
         addBookPage.setDatePublished(datePublished);
+        addBookPage.setNumberInInventory(nbrInInventory);
         
         // Add first author with a name beginning with the letter "T"
         addBookPage.sendKeysToAvailabelAuthorsList("T");
@@ -70,8 +73,6 @@ public class BookHelper {
     }
 
 
-
-    
     /**
      * Updates book with given title. 
      * Parameters with non-null values will be updated in database

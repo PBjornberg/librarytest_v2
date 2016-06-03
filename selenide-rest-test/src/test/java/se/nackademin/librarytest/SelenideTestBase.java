@@ -16,9 +16,6 @@ import static com.codeborne.selenide.Selenide.open;
  */
 public class SelenideTestBase {
     
-    protected static final String ADMIN_USER = "admin";
-    protected static final String ADMIN_PWD = "1234567890";
-    
     @Before
     public void setup() {
         open("http://localhost:8080/librarytest");

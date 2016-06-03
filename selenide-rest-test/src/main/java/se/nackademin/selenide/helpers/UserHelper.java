@@ -12,6 +12,7 @@ import se.nackademin.selenide.pages.MenuPage;
 import se.nackademin.selenide.pages.UserSignInPage;
 import se.nackademin.selenide.pages.MyProfilePage;
 import static com.codeborne.selenide.Selenide.page;
+import static com.codeborne.selenide.Selenide.page;
 
 /**
  * @author testautomatisering

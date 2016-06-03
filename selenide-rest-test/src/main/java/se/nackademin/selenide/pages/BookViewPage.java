@@ -63,6 +63,9 @@ public class BookViewPage extends MenuPage {
     public void clickBorrowBookButton() {
         clickButton("borrow book button", borrowBookButton);
     } 
+    public boolean isBorrowBookButtonDisplayed(){
+        return borrowBookButton.isDisplayed();
+    }
     
     public void clickReturnBookButton() {
         clickButton("return book button", returnBookButton);

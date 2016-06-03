@@ -68,6 +68,10 @@ public class BookFormPage extends PageBase {
         setTextFieldValue("date published field", datePublished, datePublishedField);
     }
     
+    public void setNumberInInventory(String nbrInInventory){
+        setTextFieldValue("number in inventory filed", nbrInInventory, nbrInInventoryField);
+    }
+    
     public void sendKeysToAvailabelAuthorsList(String keysToSend){
         availableAuthorsList.sendKeys(keysToSend);        
     }
