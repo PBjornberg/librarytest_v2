@@ -12,7 +12,7 @@ import org.openqa.selenium.support.FindBy;
  *
  * @author administrator
  */
-public class AuthorAddPage extends MenuPage{
+public class AuthorFormPage extends MenuPage{
     @FindBy(css = "#gwt-uid-7")
     private SelenideElement firstNameField;
     @FindBy(css = "#gwt-uid-9")
@@ -23,11 +23,9 @@ public class AuthorAddPage extends MenuPage{
     private SelenideElement biographyField; 
     @FindBy(css = "#add-author-button")
     private SelenideElement addAuthorButton;
-
-
-    public void clickAddAuthorButton() {
-        clickButton("add author button", addAuthorButton);
-    }    
+    @FindBy(css = "#save-author-button")
+    private SelenideElement saveAuthorButton;    
+ 
 
     public void setFirstNameField(String firstName) {
         setTextFieldValue("first name", firstName, firstNameField);
@@ -44,4 +42,12 @@ public class AuthorAddPage extends MenuPage{
     public void setBibliographyField(String biography) {
         setTextFieldValue("biography", biography, biographyField);
     }
+    
+    public void clickAddAuthorButton() {
+        clickButton("add author button", addAuthorButton);
+    }   
+    
+    public void clickSaveAuthorButton() {
+        clickButton("save author button", saveAuthorButton);
+    }       
 }

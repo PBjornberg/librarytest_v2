@@ -93,8 +93,8 @@ public class BookHelper {
             String numberInInventory,
             String datePublished) {
         
-        BookViewPage bookPage = fetchBookPage(searchTitle);        
-        bookPage.clickEditBookButton();
+        BookViewPage bookViewPage = fetchBookPage(searchTitle);        
+        bookViewPage.clickEditBookButton();
         
         BookFormPage editBookPage = page(BookFormPage.class);
         
@@ -108,15 +108,15 @@ public class BookHelper {
     
     public static void borrowBook(String searchTitle) {
         
-        BookViewPage bookPage = fetchBookPage(searchTitle);
-        bookPage.clickBorrowBookButton();
-        bookPage.clickConfirmDialogOKButton();
+        BookViewPage bookViewPage = fetchBookPage(searchTitle);
+        bookViewPage.clickBorrowBookButton();
+        bookViewPage.clickConfirmDialogOKButton();
     }
     
     public static void returnBook(String searchTitle) {
         
-        BookViewPage bookPage = fetchBookPage(searchTitle);
-        bookPage.clickReturnBookButton();
-        bookPage.clickConfirmDialogOKButton();
+        BookViewPage bookViewPage = fetchBookPage(searchTitle);
+        bookViewPage.clickReturnBookButton();
+        bookViewPage.clickConfirmDialogOKButton();
     }
 }

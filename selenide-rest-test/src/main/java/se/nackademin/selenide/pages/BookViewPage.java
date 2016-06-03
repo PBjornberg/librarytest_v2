@@ -36,6 +36,8 @@ public class BookViewPage extends MenuPage {
     
     @FindBy(css = "#edit-book-button")
     private SelenideElement editBookButton;
+    @FindBy(css = "#delete-book-button")
+    private SelenideElement deleteBookButton;        
     @FindBy(css = "#confirmdialog-ok-button")
     private SelenideElement confirmDialogOKButton;  
     
@@ -78,7 +80,11 @@ public class BookViewPage extends MenuPage {
     public void clickEditBookButton() {
         clickButton("edit book button", editBookButton);
     }
-
+    
+    public void clickDeleteBookButton() {
+        clickButton("delete book button", deleteBookButton);
+    }    
+    
     public void waitForPageToLoad() {
         WebElement element = new WebDriverWait(getWebDriver(), 30).until(ExpectedConditions.elementToBeClickable(nbrOfCopiesAvailableField)); 
     }

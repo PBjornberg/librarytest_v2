@@ -10,7 +10,6 @@ import org.junit.Test;
 import se.nackademin.selenide.helpers.AuthorHelper;
 import se.nackademin.selenide.helpers.BookHelper;
 import se.nackademin.selenide.helpers.UserHelper;
-import se.nackademin.selenide.model.Author;
 import se.nackademin.selenide.model.User;
 import se.nackademin.selenide.pages.BookViewPage;
 import se.nackademin.selenide.pages.MenuPage;
@@ -18,8 +17,11 @@ import se.nackademin.selenide.pages.MyProfilePage;
 import static com.codeborne.selenide.Selenide.sleep;
 import static org.hamcrest.CoreMatchers.containsString;
 import se.nackademin.selenide.pages.UserFormPage;
-import static se.nackademin.librarytest.Constants.ADMIN_PWD;
-import static se.nackademin.librarytest.Constants.ADMIN_USER;
+import static se.nackademin.librarytest.Constants.LIBRARIAN_USER;
+import static se.nackademin.librarytest.Constants.LIBRARIAN_PWD;
+import static se.nackademin.librarytest.Constants.LOANER_PWD;
+import static se.nackademin.librarytest.Constants.LOANER_USER;
+import se.nackademin.selenide.pages.AuthorViewPage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -52,28 +54,37 @@ public class SelenideTest extends SelenideTestBase {
      * Skapa en ny författare
      */
     @Test
-    public void testLoginAndCreateAuthor(){
+    public void testCreateModifyDeleteAuthor(){
 
-        String firstName = "Ernest";
-        String lastName = "Hemingway";
-        String biography = "Ernest Miller Hemingway (July 21, 1899 – July 2, 1961) "
-                + "was an American novelist, short story writer, and journalist. "
-                + "His economical and understated style had a strong influence on 20th-century fiction, "
-                + "while his life of adventure and his public image influenced later generations.";
+        String firstName = UUID.randomUUID().toString();
+        String lastName = "X";
+        String shortBiography = "Short bio";
+        String longBiography = "Long biography bla bla bla...";
         String country = "USA";
 
         // Log in as admin user and create new author
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);        
-        AuthorHelper.createNewAuthor(firstName, lastName, country, biography);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);        
+        AuthorHelper.createAuthor(firstName, lastName, country, shortBiography);
 
         // Verify fetched author
-        Author author = AuthorHelper.fetchAuthor("Hemingway");
-        assertEquals("Authors name should be first and laast names concatenated", firstName +" "+ lastName, author.getName());
-        assertEquals(country, author.getCountry());
-        assertEquals(biography, author.getBiography());
+        AuthorViewPage authorViewPage = AuthorHelper.fetchAuthor(firstName);
+        assertEquals("Authors name should be first and last names concatenated", firstName +" "+ lastName, authorViewPage.getName());
+        assertEquals(country, authorViewPage.getCountry());
+        assertEquals(shortBiography, authorViewPage.getBiography());      
+        
+        authorViewPage.clickEditAuthorButton();
+
+        AuthorHelper.editAuthor(firstName, lastName, country, longBiography);
+        // Verify fetched author
+        authorViewPage = AuthorHelper.fetchAuthor(firstName);
+        assertEquals("Authors name should be first and last names concatenated", firstName +" "+ lastName, authorViewPage.getName());
+        assertEquals(country, authorViewPage.getCountry());
+        assertEquals(longBiography, authorViewPage.getBiography());  
+
+        authorViewPage.clickEditAuthorButton();        
+        
     }
 
-    
     /**
      * Skapa användare, logga in - logga ut
      */
@@ -81,7 +92,7 @@ public class SelenideTest extends SelenideTestBase {
     public void testSignInAndSignOut(){
         
         // Sign in
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);
         
         // Verify there is a link to the profile page
         MenuPage menuPage = page(MenuPage.class); 
@@ -131,7 +142,7 @@ public class SelenideTest extends SelenideTestBase {
      * Skapa ny bok
      */
     @Test
-    public void testAddBook(){
+    public void testCreateAndDeleteBook(){
         
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String datePublished = df.format(new Date());
@@ -140,16 +151,20 @@ public class SelenideTest extends SelenideTestBase {
         final String expectedAuthor = "Terry Pratchett";
         
         // Log in as admin user
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);
         
         // Crate a nw book
         BookHelper.createBook(title, description, null, null, "1", datePublished); 
 
-        BookViewPage bp = BookHelper.fetchBookPage(title);
+        BookViewPage bookViewPage = BookHelper.fetchBookPage(title);
         
-        assertEquals(title, bp.getTitle());
-        assertEquals(description, bp.getDescription());   
-        assertEquals(expectedAuthor, bp.getAuthor());
+        assertEquals(title, bookViewPage.getTitle());
+        assertEquals(description, bookViewPage.getDescription());   
+        assertEquals(expectedAuthor, bookViewPage.getAuthor());
+        
+        bookViewPage.clickDeleteBookButton();
+        bookViewPage.clickConfirmDialogOKButton();
+        
     }
     
     
@@ -165,7 +180,7 @@ public class SelenideTest extends SelenideTestBase {
         final String bookTitle = "Good Omens";         
         
         // Log in as admin user
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);
         
         // We dont know for sure what "date published" the book has
         // Therefore, we must change the value twice
@@ -186,7 +201,7 @@ public class SelenideTest extends SelenideTestBase {
     public void testCreateUserAndBorrowBook(){
 
         // Log in with LIBRARIAN privileges
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);
 
         final String bookTitle = UUID.randomUUID().toString();
 
@@ -205,9 +220,7 @@ public class SelenideTest extends SelenideTestBase {
         assertEquals("Number of copies availabe is not decremented", nbrInInventory - 1, nbrOfCopiesAvailable);
         
         // View the same book, from a different user
-        String uuid = UUID.randomUUID().toString();
-        UserHelper.createNewUser(uuid, uuid, null, null, null, null, false); 
-        UserHelper.logInAsUser(uuid, uuid);
+        UserHelper.logInAsUser(LOANER_USER, LOANER_PWD);
         
         bookPage = BookHelper.fetchBookPage(bookTitle);        
         // Verify that there are no available copies of the book and there is no "Borrow Book" button
@@ -215,7 +228,7 @@ public class SelenideTest extends SelenideTestBase {
         assertFalse("Borrow Book-button should not be visible", bookPage.isBorrowBookButtonDisplayed());
         
         // Log in as admin again
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);        
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);        
         
         // Return book
         BookHelper.returnBook(bookTitle);
@@ -235,7 +248,7 @@ public class SelenideTest extends SelenideTestBase {
     public void testCreateLibrarianUser(){
 
         // Log in as admin user
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);
         final String uuid = UUID.randomUUID().toString();
         UserHelper.createNewUser(uuid, uuid, "firstname", "lastname", "010 - 12345678", "admin@server.com", true);
         UserHelper.logInAsUser(uuid, uuid);
@@ -250,13 +263,13 @@ public class SelenideTest extends SelenideTestBase {
     }
     
     /**
-    * Skapa användare med redan upptaget "Display Name"
+    * Skapa användare med ett redan upptaget "Display Name"
     */
     @Test
     public void testCreateUserWithDisplayNameAlreadyTaken(){
 
         // Try to create user with display name "admin"
-        UserFormPage page = UserHelper.createNewUser(ADMIN_USER, ADMIN_PWD, "firstname", "lastname", "010 - 12345678", "admin@server.com", false);
+        UserFormPage page = UserHelper.createNewUser(LIBRARIAN_USER, LIBRARIAN_PWD, "firstname", "lastname", "010 - 12345678", "admin@server.com", false);
         assertThat(page.getMessage(), containsString("display name already exists"));
         
     }
@@ -266,9 +279,8 @@ public class SelenideTest extends SelenideTestBase {
         
         String uuid = UUID.randomUUID().toString();
 
-        // Create User with role "LOANER"
-        UserHelper.createNewUser(uuid, uuid, null, null, null, null, false); 
-        UserHelper.logInAsUser(uuid,uuid);
+        // Log in with role "LOANER"        
+        UserHelper.logInAsUser(LOANER_USER, LOANER_PWD);
         
         MenuPage menuPage = page(MenuPage.class);
         sleep(2000);
@@ -280,14 +292,17 @@ public class SelenideTest extends SelenideTestBase {
         menuPage.navigateToMyProfile();
         MyProfilePage myProfilePage = page(MyProfilePage.class);
         sleep(2000);        
-        assertFalse("Delete User-button should not be visible for LOANER", myProfilePage.isDeleteUserButtonDisplayed());        
+        assertFalse("Delete User-button should not be visible for LOANER", myProfilePage.isDeleteUserButtonDisplayed());
+        
+        // Här skulle man även kunna kolla att det inte finns några knappar för Edit / Delete under View Boook / Author
+        // Testfallet blir då lite väl stort.
     }
     
     @Test
     public void verifyMenuLinksAndButtonsForLibrarian(){
         
         // Log in with role "LIBRARIAN"
-        UserHelper.logInAsUser(ADMIN_USER, ADMIN_PWD);
+        UserHelper.logInAsUser(LIBRARIAN_USER, LIBRARIAN_PWD);
         
         MenuPage menuPage = page(MenuPage.class);
         sleep(2000);
@@ -300,6 +315,9 @@ public class SelenideTest extends SelenideTestBase {
         MyProfilePage myProfilePage = page(MyProfilePage.class);
         sleep(2000);
         assertTrue("Delete User-button should be visible for LIBRARIAN", myProfilePage.isDeleteUserButtonDisplayed());
+        
+        // Här skulle man även kunna kolla att det finns knappar för Edit / Delete under View Boook / Author
+        // Sådana "djupa" tester hör dock bättre hemma i testerna av create Book / Author längre upp i testsviten        
     }    
     
 }
